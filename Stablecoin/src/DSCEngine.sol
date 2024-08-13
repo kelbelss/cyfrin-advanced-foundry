@@ -82,7 +82,7 @@ contract DSCEngine {
 
     function redeemCollateral() external {}
 
-    function mintDsc() {}
+    function mintDsc() external {}
 
     function burnDsc() external {}
 
