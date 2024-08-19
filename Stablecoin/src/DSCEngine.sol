@@ -58,6 +58,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TokenNotAllowed();
     error DSCEngine__TransferFailed();
     error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
+    error DSCEngine__MintFailed();
 
     ///////////////////
     // Types
@@ -164,6 +165,11 @@ contract DSCEngine is ReentrancyGuard {
         s_DSCMinted[msg.sender] += amountDscToMint;
         // if they minted too much
         _revertIfHealthFactorIsBroken(msg.sender);
+        // mint DSC
+        bool minted = i_dsc.mint(msg.sender, amountDscToMint);
+        if (!minted) {
+            revert DSCEngine__MintFailed();
+        }
     }
 
     function burnDsc() external {}
