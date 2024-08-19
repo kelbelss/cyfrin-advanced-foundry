@@ -119,7 +119,7 @@ contract DSCEngine is ReentrancyGuard {
         }
         // using USD Price Feeds for consistency and accuracy ETH/USD and BTC/USD
         // loop through addresses to add to mapping
-        for (uint256 i = 0; 1 < tokenAddresses.length; i++) {
+        for (uint256 i = 0; i < tokenAddresses.length; i++) {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
             s_collateralTokens.push(tokenAddresses[i]);
         }
@@ -263,5 +263,9 @@ contract DSCEngine is ReentrancyGuard {
             totalCollateralValueInUsd += _getUsdValue(token, amount);
         }
         return totalCollateralValueInUsd;
+    }
+
+    function getUsdValue(address token, uint256 amount) external view returns (uint256) {
+        return _getUsdValue(token, amount);
     }
 }
