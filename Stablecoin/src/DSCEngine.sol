@@ -27,6 +27,7 @@ pragma solidity ^0.8.18;
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {DecentralisedStableCoin} from "./DecentralisedStableCoin.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /*
  * @title DSCEngine
@@ -64,6 +65,9 @@ contract DSCEngine is ReentrancyGuard {
     ///////////////////
     // State Variables
     ///////////////////
+
+    uin256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
+    uin256 private constant PRECISION = 1e18;
 
     /// @dev Mapping of token address to price feed address
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
@@ -198,7 +202,9 @@ contract DSCEngine is ReentrancyGuard {
     function _healthFactor(address user) private view returns (uint256) {
         // get total DSC minted
         // get total collateral value
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
     }
+
     function revertIfHealthFactorIsBroken(address user) internal view {
         // check health factor (do they have enough collateral)
         // revert if they do not
@@ -211,20 +217,9 @@ contract DSCEngine is ReentrancyGuard {
     ////////////////////////////////////////////////////////////////////////////
 
     /*
-     * Returns collateral value in USD
-     * @param token:
-     * @param amount:
-     * called by getAccountCollateralValue
-     */
-    function getUsdValue(address token, uint256 amount) external view returns (uint256) {
-        // amount is in WEI
-        return _getUsdValue(token, amount);
-    }
-
-    /*
-     * Returns collateral value in USD
+     * Returns collateral value in USD - lopp through all of them and add up the value
      * @param user: person in debt
-     * gets information from _getUsdValue
+     * gets information from getUsdValue
      * called by _getAccountInformation
      */
     function getAccountCollateralValue(address user) public view returns (uint256 totalCollateralValueInUsd) {
@@ -233,8 +228,24 @@ contract DSCEngine is ReentrancyGuard {
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
             uint256 amount = s_collateralDeposited[user][token];
-            totalCollateralValueInUsd += _getUsdValue(token, amount);
+            totalCollateralValueInUsd += getUsdValue(token, amount);
         }
         return totalCollateralValueInUsd;
+    }
+
+    /*
+     * Returns collateral value in USD
+     * @param token: token being used
+     * @param amount: amount of token
+     * called by getAccountCollateralValue
+     */
+    function getUsdValue(address token, uint256 amount) external view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeed[token]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        // 1 ETH = 1000 USD
+        // The returned value from Chainlink will be 1000 * 1e8
+        // Most USD pairs have 8 decimals, so we will just pretend they all do
+        // We want to have everything in terms of WEI, so we add 10 zeros at the end
+        return (uint256(price) * ADDITIONAL_FEED_PRECISION) * amount / PRECISION; // (1000 * 1e8 * (1e10)) * 1000 * 1e18 / 1e18;
     }
 }
