@@ -61,5 +61,7 @@ contract HelperConfig is Script {
             wbtc: address(wbtcMock),
             deployerKey: DEFAULT_ANVIL_PRIVATE_KEY
         });
+
+        return anvilNetworkConfig;
     }
 }
