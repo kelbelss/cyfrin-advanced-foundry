@@ -90,6 +90,10 @@ contract DSCEngine is ReentrancyGuard {
     ///////////////////
 
     event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
+    event CollateralRedeemed( /*address indexed redeemTo,*/
+        address indexed redeemFrom, address indexed token, uint256 indexed amount
+    );
+    // if redeemFrom != redeemedTo, then it was liquidated
 
     ///////////////////
     // Modifiers
@@ -131,14 +135,69 @@ contract DSCEngine is ReentrancyGuard {
     // External Functions
     ///////////////////
 
-    function depositCollateralAndMintDsc() external {}
+    /*
+     * @param tokenCollateralAddress: The ERC20 token address of the collateral you're depositing
+     * @param amountCollateral: The amount of collateral you're depositing
+     * @param amountDscToMint: The amount of DSC you want to mint
+     * @notice This function will deposit your collateral and mint DSC in one transaction
+     */
+    function depositCollateralAndMintDsc(
+        address tokenCollateralAddress,
+        uint256 amountCollateral,
+        uint256 amountDscToMint
+    ) external {
+        depositCollateral(tokenCollateralAddress, amountCollateral);
+        mintDsc(amountDscToMint);
+    }
+
+    function redeemCollateralForDsc() external {}
+
+    /*
+     * @param tokenCollateralAddress: The ERC20 token address of the collateral you're redeeming
+     * @param amountCollateral: The amount of collateral you're redeeming
+     * @notice This function will redeem your collateral.
+     * @notice If you have DSC minted, you will not be able to redeem until you burn your DSC
+     */
+    // health factor must be over 1 after collateral is pulled
+    function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral)
+        external
+        moreThanZero(amountCollateral)
+        nonReentrant
+    {
+        s_collateralDeposited[msg.sender][tokenCollateralAddress] -= amountCollateral;
+        emit CollateralRedeemed(msg.sender, tokenCollateralAddress, amountCollateral);
+        bool success = IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+        _revertIfHealthFactorIsBroken(msg.sender);
+    }
+
+    function burnDsc(uint256 amount) external moreThanZero(amount) {
+        s_DSCMinted[msg.sender] -= amount;
+        bool success = i_dsc.transferFrom(msg.sender, address(this), amount);
+        // This conditional is hypothetically unreachable - if transfer fails that will throw error already
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+        i_dsc.burn(amount);
+        _revertIfHealthFactorIsBroken(msg.sender); // not needed ever
+    }
+
+    function liquidate() external {}
+
+    function getHealthFactor() external {}
+
+    ///////////////////
+    // Public Functions
+    ///////////////////
 
     /*
      * @param tokenCollateralAddress: The ERC20 token address of the collateral being deposited
      * @param amountCollateral: The amount of collateral deposited
      */
     function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral)
-        external
+        public
         moreThanZero(amountCollateral)
         isAllowedToken(tokenCollateralAddress)
         nonReentrant
@@ -152,15 +211,11 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function redeemCollateralForDsc() external {}
-
-    function redeemCollateral() external {}
-
     /*
      * @param amountDscToMint: The amount of DSC you want to mint
      * You can only mint DSC if you have enough collateral
      */
-    function mintDsc(uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
+    function mintDsc(uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
         // check if collateral value is more than dsc amount? price feeds? values of collateral?
         s_DSCMinted[msg.sender] += amountDscToMint;
         // if they minted too much
@@ -171,16 +226,6 @@ contract DSCEngine is ReentrancyGuard {
             revert DSCEngine__MintFailed();
         }
     }
-
-    function burnDsc() external {}
-
-    function liquidate() external {}
-
-    function getHealthFactor() external {}
-
-    ///////////////////
-    // Public Functions
-    ///////////////////
 
     ///////////////////
     // Private Functions
