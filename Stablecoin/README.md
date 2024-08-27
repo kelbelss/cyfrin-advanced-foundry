@@ -8,3 +8,9 @@
 3. Collateral: Exogenous (Crypto) 
    1. wETH 
    2. wBTC
+
+
+### Fuzzing
+
+Foundry Invariants are stateful fuzzing
+Foundry Fuzzing is stateless fuzzing
