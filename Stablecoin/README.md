@@ -10,7 +10,13 @@
    2. wBTC
 
 
-### Fuzzing
+### Fuzzing Notes
 
 Foundry Invariants are stateful fuzzing
 Foundry Fuzzing is stateless fuzzing
+
+
+What are the invariants?
+
+1. The total supply of DSC should be less than the total value of collateral
+2. Getter view functions should never revert <- evergreen invariant
