@@ -8,13 +8,14 @@ import {DecentralisedStableCoin} from "../../../src/DecentralisedStableCoin.sol"
 import {HelperConfig} from "../../../script/HelperConfig.s.sol";
 import {DeployDSC} from "../../../script/DeployDSC.s.sol";
 import {ERC20Mock} from "../../mocks/ERC20Mock.sol";
-// import { StopOnRevertHandler } from "./StopOnRevertHandler.t.sol";
+import {StopOnRevertHandler} from "./StopOnRevertHandler.t.sol";
 
 contract InvariantsTest is StdInvariant, Test {
     DeployDSC public deployer;
     DSCEngine public dsce;
     DecentralisedStableCoin public dsc;
     HelperConfig public helperConfig;
+    StopOnRevertHandler public handler;
 
     address public weth;
     address public wbtc;
@@ -23,7 +24,8 @@ contract InvariantsTest is StdInvariant, Test {
         deployer = new DeployDSC();
         (dsc, dsce, helperConfig) = deployer.run();
         (,, weth, wbtc,) = helperConfig.activeNetworkConfig();
-        targetContract(address(dsce));
+        handler = new StopOnRevertHandler(dsce, dsc);
+        targetContract(address(handler));
     }
 
     function invariant_protocolMustHaveMoreValueThatTotalSupplyDollars() public view {
