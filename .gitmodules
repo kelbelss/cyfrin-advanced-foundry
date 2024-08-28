@@ -19,3 +19,6 @@
 [submodule "Stablecoin/lib/chainlink-brownie-contracts"]
 	path = Stablecoin/lib/chainlink-brownie-contracts
 	url = https://github.com/smartcontractkit/chainlink-brownie-contracts
+[submodule "DAOs/lib/forge-std"]
+	path = DAOs/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
