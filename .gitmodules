@@ -25,3 +25,6 @@
 [submodule "DAOs/lib/openzeppelin-contracts"]
 	path = DAOs/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "Airdrop/lib/forge-std"]
+	path = Airdrop/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
