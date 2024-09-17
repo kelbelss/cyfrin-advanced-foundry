@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-// import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 // import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
@@ -15,8 +15,14 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 contract MerkleAirdrop is EIP712 {
     // merkle proofs - merkle tree (data structure) prove that some piece of data is in a group of data we have without iterating through a massive array
 
+    using SafeERC20 for IERC20; // Prevent sending tokens to recipients who can’t receive
+
+    error MerkleAirdrop__InvalidProof();
+
     IERC20 private immutable i_airdropToken;
     bytes32 private immutable i_merkleRoot;
+
+    event Claimed(address account, uint256 amount);
 
     constructor(bytes32 merkleRoot, IERC20 airdropToken) EIP712("Merkle Airdrop", "1.0.0") {
         i_merkleRoot = merkleRoot;
@@ -26,5 +32,13 @@ contract MerkleAirdrop is EIP712 {
     function claim(address account, uint256 amount, bytes32[] calldata merkleProof) external {
         // calculate using the account and the amount, the hash -> leaf node
         bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
+
+        // verify the merkle proof
+        if (!MerkleProof.verify(merkleProof, i_merkleRoot, leaf)) {
+            revert MerkleAirdrop__InvalidProof();
+        }
+
+        emit Claimed(account, amount);
+        i_airdropToken.safeTransfer(account, amount);
     }
 }
