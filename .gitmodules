@@ -31,3 +31,6 @@
 [submodule "Airdrop/lib/openzeppelin-contracts"]
 	path = Airdrop/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "Airdrop/lib/murky"]
+	path = Airdrop/lib/murky
+	url = https://github.com/dmfxyz/murky
