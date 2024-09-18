@@ -34,3 +34,6 @@
 [submodule "Airdrop/lib/murky"]
 	path = Airdrop/lib/murky
 	url = https://github.com/dmfxyz/murky
+[submodule "Airdrop/lib/foundry-devops"]
+	path = Airdrop/lib/foundry-devops
+	url = https://github.com/cyfrin/foundry-devops
