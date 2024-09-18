@@ -18,11 +18,17 @@ contract MerkleAirdrop is EIP712 {
     using SafeERC20 for IERC20; // Prevent sending tokens to recipients who can’t receive
 
     error MerkleAirdrop__InvalidProof();
+    error MerkleAirdrop__AlreadyClaimed();
 
     IERC20 private immutable i_airdropToken;
     bytes32 private immutable i_merkleRoot;
+    mapping(address => bool) private s_hasClaimed;
 
     event Claimed(address account, uint256 amount);
+
+    /*//////////////////////////////////////////////////////////////
+                             FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
 
     constructor(bytes32 merkleRoot, IERC20 airdropToken) EIP712("Merkle Airdrop", "1.0.0") {
         i_merkleRoot = merkleRoot;
@@ -30,6 +36,10 @@ contract MerkleAirdrop is EIP712 {
     }
 
     function claim(address account, uint256 amount, bytes32[] calldata merkleProof) external {
+        if (s_hasClaimed[account]) {
+            revert MerkleAirdrop__AlreadyClaimed();
+        }
+
         // calculate using the account and the amount, the hash -> leaf node
         bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
 
@@ -38,7 +48,19 @@ contract MerkleAirdrop is EIP712 {
             revert MerkleAirdrop__InvalidProof();
         }
 
+        s_hasClaimed[account] = true; // prevent users claiming more than once and draining the contract
         emit Claimed(account, amount);
         i_airdropToken.safeTransfer(account, amount);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             VIEW AND PURE
+    //////////////////////////////////////////////////////////////*/
+    function getMerkleRoot() external view returns (bytes32) {
+        return i_merkleRoot;
+    }
+
+    function getAirdropToken() external view returns (IERC20) {
+        return i_airdropToken;
     }
 }
