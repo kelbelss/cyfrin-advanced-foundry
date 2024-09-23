@@ -4,11 +4,11 @@ pragma solidity ^0.8.24;
 import {Script, console} from "forge-std/Script.sol";
 
 contract SplitSignature is Script {
-    error __SplitSignatureScript__InvalidSignatureLength();
+    error SplitSignatureScript__InvalidSignatureLength();
 
     function splitSignature(bytes memory sig) internal pure returns (uint8 v, bytes32 r, bytes32 s) {
         if (sig.length != 65) {
-            revert __SplitSignatureScript__InvalidSignatureLength();
+            revert SplitSignatureScript__InvalidSignatureLength();
         }
 
         assembly {
