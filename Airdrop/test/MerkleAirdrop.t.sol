@@ -13,6 +13,7 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
 
     address user;
     uint256 userPrivKey;
+    address gasPayer;
 
     bytes32 merkleRoot = 0xaa5d581231e596618465a56aa0f5870ba6e20785fe436d5bfb82b08662ccc7c4;
     uint256 amountToCollect = (25 * 1e18); // 25.000000
@@ -33,13 +34,25 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
             token.transfer(address(airdrop), amountToSend);
         }
         (user, userPrivKey) = makeAddrAndKey("user");
+        gasPayer = makeAddr("gasPayer");
+    }
+
+    function signMessage(uint256 privKey, address account) public view returns (uint8 v, bytes32 r, bytes32 s) {
+        bytes32 hashedMessage = airdrop.getMessageHash(account, amountToCollect);
+        (v, r, s) = vm.sign(privKey, hashedMessage);
     }
 
     function testUsersCanClaim() public {
         uint256 startingBalance = token.balanceOf(user);
 
-        vm.prank(user);
-        airdrop.claim(user, amountToCollect, proof);
+        // get the signature
+        vm.startPrank(user);
+        (uint8 v, bytes32 r, bytes32 s) = signMessage(userPrivKey, user);
+        vm.stopPrank();
+
+        // gasPayer claims the airdrop for the user
+        vm.prank(gasPayer);
+        airdrop.claim(user, amountToCollect, proof, v, r, s);
 
         uint256 endingBalance = token.balanceOf(user);
         console.log("Ending balance", endingBalance);
