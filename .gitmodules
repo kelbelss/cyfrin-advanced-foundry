@@ -37,3 +37,6 @@
 [submodule "Airdrop/lib/foundry-devops"]
 	path = Airdrop/lib/foundry-devops
 	url = https://github.com/cyfrin/foundry-devops
+[submodule "Upgrades/lib/forge-std"]
+	path = Upgrades/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
