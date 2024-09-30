@@ -1,3 +1,5 @@
 Stablecoin/lib/chainlink-brownie-contracts/
 .vscode/settings.json
 Airdrop/lib/openzeppelin-contracts
+Upgrades/lib/openzeppelin-contracts-upgradeable/
+Upgrades/lib/openzeppelin-contracts/
