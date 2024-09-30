@@ -5,7 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {BoxV1} from "../src/BoxV1.sol";
 import {BoxV2} from "../src/BoxV2.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {DevOpsTools} from "Upgrades/lib/foundry-devops/src/DevOpsTools.sol";
+import {DevOpsTools} from "../lib/foundry-devops/src/DevOpsTools.sol";
 
 contract UpgradeBox is Script {
     function run() external returns (address) {
@@ -21,7 +21,7 @@ contract UpgradeBox is Script {
     function upgradeBox(address proxyAddress, address newBox) public returns (address) {
         vm.startBroadcast();
         BoxV1 proxy = BoxV1(payable(proxyAddress));
-        proxy.upgradeTo(address(newBox));
+        proxy.upgradeToAndCall(address(newBox), /**data**/);
         vm.stopBroadcast();
         return address(proxy);
     }
