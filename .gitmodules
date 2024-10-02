@@ -49,3 +49,6 @@
 [submodule "Upgrades/lib/foundry-devops"]
 	path = Upgrades/lib/foundry-devops
 	url = https://github.com/cyfrin/foundry-devops
+[submodule "AccountAbstraction/lib/forge-std"]
+	path = AccountAbstraction/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
