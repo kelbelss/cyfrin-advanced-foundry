@@ -52,3 +52,15 @@
 [submodule "AccountAbstraction/lib/forge-std"]
 	path = AccountAbstraction/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "AccountAbstraction/lib/openzeppelin-contracts"]
+	path = AccountAbstraction/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "AccountAbstraction/lib/account-abstraction"]
+	path = AccountAbstraction/lib/account-abstraction
+	url = https://github.com/eth-infinitism/account-abstraction
+[submodule "AccountAbstraction/lib/foundry-era-contracts"]
+	path = AccountAbstraction/lib/foundry-era-contracts
+	url = https://github.com/cyfrin/foundry-era-contracts
+[submodule "AccountAbstraction/lib/foundry-devops"]
+	path = AccountAbstraction/lib/foundry-devops
+	url = https://github.com/cyfrin/foundry-devops

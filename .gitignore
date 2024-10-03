@@ -4,3 +4,7 @@ Airdrop/lib/openzeppelin-contracts
 Upgrades/lib/openzeppelin-contracts-upgradeable/
 Upgrades/lib/openzeppelin-contracts/
 Upgrades/lib/foundry-devops
+AccountAbstraction/lib/account-abstraction
+AccountAbstraction/lib/foundry-devops
+AccountAbstraction/lib/foundry-era-contracts
+AccountAbstraction/lib/openzeppelin-contracts
