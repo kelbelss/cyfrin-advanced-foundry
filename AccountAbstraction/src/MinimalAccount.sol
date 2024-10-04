@@ -13,5 +13,14 @@ contract MinimalAccount is IAccount, Ownable {
     function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
         external
         returns (uint256 validationData)
+    {
+        _validateSignature(userOp, userOpHash);
+    }
+
+    // EIP-191 version of the signed hash
+    function _validateSignature(PackedUserOperation calldata userOp, bytes32 userOpHash)
+        internal
+        view
+        returns (uint256 validationData)
     {}
 }
