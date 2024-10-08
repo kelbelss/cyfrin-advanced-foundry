@@ -18,7 +18,7 @@ contract MinimalAccount is IAccount, Ownable {
         returns (uint256 validationData)
     {
         validationData = _validateSignature(userOp, userOpHash);
-        // should _validateNonce()
+        // should _validateNonce() - entry point contract should do this
         _payPrefund(missingAccountFunds);
     }
 
