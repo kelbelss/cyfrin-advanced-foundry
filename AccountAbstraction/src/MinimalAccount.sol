@@ -12,7 +12,22 @@ import {IEntryPoint} from "../lib/account-abstraction/contracts/interfaces/IEntr
 contract MinimalAccount is IAccount, Ownable {
     // entry point contract will call this one
 
+    /*//////////////////////////////////////////////////////////////
+                                 ERRORS
+    //////////////////////////////////////////////////////////////*/
+    error MinimalAccount__NotFromEntryPoint();
+
     IEntryPoint private immutable i_entryPoint;
+
+    /*//////////////////////////////////////////////////////////////
+                               MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+    modifier requireFromEntryPoint() {
+        if (msg.sender != address(i_entryPoint)) {
+            revert MinimalAccount__NotFromEntryPoint();
+        }
+        _;
+    }
 
     constructor(address entryPoint) Ownable(msg.sender) {
         i_entryPoint = IEntryPoint(entryPoint);
@@ -46,5 +61,12 @@ contract MinimalAccount is IAccount, Ownable {
             (bool success,) = payable(msg.sender).call{value: missingAccountFunds, gas: type(uint256).max}("");
             (success);
         }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                GETTERS
+    //////////////////////////////////////////////////////////////*/
+    function getEntryPoint() external view returns (address) {
+        return address(i_entryPoint);
     }
 }
